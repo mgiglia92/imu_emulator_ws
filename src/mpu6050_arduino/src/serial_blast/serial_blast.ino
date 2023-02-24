@@ -1,9 +1,5 @@
-#define SERIAL_BUFFER_SIZE 256
-#include </home/michaelgiglia/testing-code/include/enums.hpp>
-#include <stdlib.h>
-#include </home/michaelgiglia/testing-code/include/macros.hpp>
+
 #include <rcc.h>
-ARD_STATE state = ARD_STATE::ACTIVE;
 unsigned long cur, prev;
 unsigned long dt = 10000;
 double a[100];
@@ -14,7 +10,9 @@ MPU6050 imu;
 char ax[10];
 char curstr[10];
 
-unsigned long dtbuff[100];
+
+const unsigned long dtbufflen = 100;
+unsigned long dtbuff[dtbufflen];
 unsigned long dtavg=0;
 unsigned long dta;
 
@@ -36,7 +34,7 @@ void loop() {
     
     dtbuff[index]=dta;
     if(index<100){index++;}else{index=0;}
-    dtavg = get_avg(dtbuff, ARR_LEN(dtbuff));
+    dtavg = get_avg(dtbuff, dtbufflen);
     ultoa(dtavg, curstr, 10);
     dtostrf(imu.getAccelX(), 4, 4, ax);
     Serial.print('$');
