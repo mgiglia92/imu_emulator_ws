@@ -5,11 +5,12 @@ unsigned long dt = 10000;
 double a[100];
 float val;
 int index=0;
+bool skip;
 
 MPU6050 imu;
 char ax[10];
 char curstr[10];
-
+char skipstr[10];
 
 const unsigned long dtbufflen = 100;
 unsigned long dtbuff[dtbufflen];
@@ -27,24 +28,28 @@ imu.begin();
 
 void loop() {
   // put your main code here, to run repeatedly:
-  imu.update();
   cur = micros();
   dta = cur-prev;
+
   if (dt < dta) {
-    
+    imu.update();
     dtbuff[index]=dta;
     if(index<100){index++;}else{index=0;}
     dtavg = get_avg(dtbuff, dtbufflen);
     ultoa(dtavg, curstr, 10);
     dtostrf(imu.getAccelX(), 4, 4, ax);
-    Serial.print('$');
-    Serial.print(ax);
-    Serial.print('|');
-    Serial.print(curstr);
-    Serial.print('%');
+    itoa(int(skip), skipstr, 4);
+    Serial.write('$');
+    Serial.write(ax);
+    Serial.write('|');
+    Serial.write(curstr);
+    Serial.write('|');
+    Serial.write(skipstr);
+    Serial.write('%');
     prev = cur;
   }
   
+
 }
 
 unsigned long get_avg(unsigned long *buf, int len)
