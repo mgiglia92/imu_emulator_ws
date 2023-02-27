@@ -3,24 +3,26 @@
 #include <string>
 #include <iostream>
 #include <CppLinuxSerial/Exception.hpp>
+#include <Ring-Buffer/ringbuffer.h>
 
 using namespace std;
 namespace SerialStateMachine{
     struct StateMachine
     {
-        std::string bom = "$";
-        std::string eom = "%";
-        std::string previous = "";
-        std::string current = "";
-        std::string incoming = "";
-        bool ready = false;
+        char bom;// = '$';
+        char eom;// = '%';
+        char prev[100];
+        char current[100];
+        char buf_arr[1024];
+        ring_buffer_t* ring_buffer;
+
     };
-    void smInit(StateMachine *sm, std::string bom = "$", std::string eom = "%")
+    void smInit(StateMachine *sm, char bom = '$', char eom = '%')
     {   
-        sm->previous="";
-        sm->current = "";
-        sm->incoming = "";
-        sm->ready = false;
+        char buf_arr[100];
+        sm->bom = bom;
+        sm->eom=eom;
+        ring_buffer_init(sm->ring_buffer, buf_arr, (size_t)sizeof(buf_arr));
     }
 
 
@@ -38,33 +40,12 @@ namespace SerialStateMachine{
 
     void update(StateMachine* sm)
     {
-        StateMachine m = *sm;
-        //See Data at beginning of incoming is equivalent to a valid string
-        int16_t somPos = findBOM(&m.incoming, &m.bom);
-        int16_t eomPos = findEOM(&m.incoming, &m.eom);
-        stringstream ss;
-        // ss << bomPos;
-        // cout << ss.str() <<  std::endl;
 
-        if(somPos != string::npos && eomPos !=string::npos)
-        {
-            sm->previous = sm->current;
-            sm->current = sm->incoming;
-            sm->incoming = "";
-        }
-        // else if(somPos > 0)
-        // {
-        //     //Remove character up till SOM
-        //     sm->incoming = sm->incoming.substr(0, somPos-1);
-        // }
-        // cout << somPos << std::endl;
     }
 
     void append(struct StateMachine *sm, std::string data)
     {
-        sm->incoming.append(data);
-        update(sm);
-        
+
     }
 }
 #endif 
